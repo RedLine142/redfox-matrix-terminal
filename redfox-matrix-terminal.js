@@ -152,7 +152,7 @@
         return;
       }
 
-      var match = command.match(/^cd\\s+(.+)$/i);
+      var match = command.match(/^cd\s+(.+)$/i);
       if (match) {
         var target = match[1].trim().replace(/\//g, '\\').replace(/^["']|["']$/g, '');
         target = target.replace(/^RF:\\?/i, '').replace(/^\\+/, '').toLowerCase();
