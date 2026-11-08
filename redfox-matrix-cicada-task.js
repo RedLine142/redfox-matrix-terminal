@@ -152,15 +152,15 @@
 
     function draw() {
       frame += 1;
-      ctx.fillStyle = 'rgba(0, 7, 2, 0.12)';
+      ctx.fillStyle = 'rgba(0, 7, 2, 0.08)';
       ctx.fillRect(0, 0, width, height);
       ctx.font = '12px monospace';
       for (var i = 0; i < columns; i += 1) {
         var y = drops[i] * 18;
-        ctx.fillStyle = Math.random() > 0.985 ? 'rgba(180,255,195,.75)' : 'rgba(30,190,75,.32)';
+        ctx.fillStyle = Math.random() > 0.985 ? 'rgba(210,255,220,.95)' : 'rgba(55,230,105,.55)';
         ctx.fillText(chars.charAt(Math.floor(Math.random() * chars.length)), i * 19, y);
         if (y > height && Math.random() > 0.98) drops[i] = 0;
-        drops[i] += 0.35 + Math.random() * 0.35;
+        drops[i] += 0.175 + Math.random() * 0.175;
       }
 
       // CICADA 3301: characters flash independently at random positions.
@@ -202,7 +202,7 @@
     if (document.getElementById(STYLE_ID)) return;
     var css = [
       'html,body{min-height:100%;background:#010603!important;color:#a4ffb8!important;}body{position:relative;font-family:Consolas,"Courier New",monospace!important;}',
-      '#matrix-task-effects{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}#matrix-task-effects .mt-rain{position:absolute;inset:0;opacity:.28;}#matrix-task-effects .mt-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 35%,rgba(0,0,0,.58) 100%);}',
+      '#matrix-task-effects{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}#matrix-task-effects .mt-rain{position:absolute;inset:0;opacity:.48;}#matrix-task-effects .mt-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 35%,rgba(0,0,0,.58) 100%);}',
       'body>.wrapper{position:relative;z-index:1;}',
       '.matrix-task-container{box-sizing:border-box;width:min(1180px,calc(100% - 32px))!important;max-width:1180px!important;margin:76px auto 86px!important;padding:0!important;background:rgba(0,12,5,.91)!important;border:1px solid #176332!important;box-shadow:0 0 35px rgba(0,255,90,.11),inset 0 0 35px rgba(0,255,90,.035)!important;color:#a4ffb8!important;font-family:Consolas,"Courier New",monospace!important;}',
       '.mt-topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid #14552a;background:rgba(0,35,12,.82);font-size:11px;letter-spacing:2px;}',
