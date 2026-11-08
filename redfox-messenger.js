@@ -123,7 +123,8 @@
       if (forbidden.some(w => w && n.includes(w))) return 0;
       const required=(m.all || []).map(norm);
       if (required.some(w => w && !n.includes(w))) return 0;
-      const any=(m.any || []).map(norm), hits=any.filter(w => w && n.includes(w)).length;
+      const stop=new Set(['кто','что','где','почему','как','ты','мне','это','он','она','когда','можно','есть','делать','который','которое','тебе','его','ее','мы','вы']);
+      const any=(m.any || []).map(norm).filter(w => w && !stop.has(w)), hits=any.filter(w => n.includes(w)).length;
       if (hits < Number(m.min || 1)) return 0;
       return 10+hits*8+required.length*5;
     }
