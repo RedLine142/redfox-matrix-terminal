@@ -249,7 +249,7 @@
       { text: 'INDEXING GAME DIRECTORIES ...... ' + entries.length + ' FOUND', style: 'mx-dim' },
       { text: 'SECURE CONNECTION ESTABLISHED', style: 'mx-success' },
       { text: 'WAKE UP, ' + teamName + '...', style: 'mx-wakeup' },
-      { text: 'THE MATRIX HAS YOU.', style: 'mx-success' }
+      { text: 'МАТРИЦА ТЕБЯ ЗАХВАТИЛА.', style: 'mx-success' }
     ];
 
     function typeBootLine(index) {
