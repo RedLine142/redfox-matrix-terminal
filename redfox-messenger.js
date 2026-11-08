@@ -143,7 +143,9 @@
     function scheduleEvents() {
       (config.events || []).forEach(ev => {
         if (!ev.id || !ev.whenFlag || !state.flags[ev.whenFlag] || state.flags['__event_'+ev.id]) return;
-        state.flags['__event_'+ev.id] = true; save();
+        state.flags['__event_'+ev.id] = true;
+        if (ev.unlockFlag) state.flags[ev.unlockFlag] = true;
+        save(); renderContacts();
         const delay = Array.isArray(ev.delay) ? ev.delay[0] + Math.random()*(ev.delay[1]-ev.delay[0]) : Number(ev.delay || 5000);
         setTimeout(() => {
           const c = getContact(ev.contactId);
