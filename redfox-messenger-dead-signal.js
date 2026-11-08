@@ -5,7 +5,6 @@
     title: 'DEAD SIGNAL',
     subtitle: 'ЗАЩИЩЁННЫЙ КАНАЛ / СЕАНС 07',
     launchLabel: 'ОТКРЫТЬ МЕССЕНДЖЕР',
-    replyDelay: [1300, 3400],
     autoOpen: false,
     fallback: [
       'Связь нестабильна. Я не понял сообщение. Попробуй сформулировать иначе.',
