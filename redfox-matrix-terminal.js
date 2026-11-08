@@ -68,8 +68,8 @@
         '</div>' +
         '<form class="mx-input-line" id="mx-form" autocomplete="off">' +
           '<label for="mx-command">RedFox:\\RF&gt;</label>' +
-          '<input id="mx-command" name="command" type="text" spellcheck="false" autocapitalize="off" autocomplete="off" autofocus aria-label="Введите команду">' +
           '<span class="mx-cursor"></span>' +
+          '<input id="mx-command" name="command" type="text" spellcheck="false" autocapitalize="off" autocomplete="off" autofocus aria-label="Введите команду">' +
         '</form>' +
         '<div class="mx-footer"><span>ENTER — EXECUTE</span><span>TYPE HELP FOR COMMANDS</span><span id="mx-clock"></span></div>' +
       '</div>';
