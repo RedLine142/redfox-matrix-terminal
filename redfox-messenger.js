@@ -163,24 +163,28 @@
       toast.textContent=message; toast.classList.add('show');
       setTimeout(()=>toast.classList.remove('show'),3600);
     }
-    function answer(contact,text) {
-      const intent=findIntent(contact,text);
-      if (!intent) {
-        addMessage(contact.id,'them',pick(contact.fallback || config.fallback || ['Не понял сообщение. Попробуй иначе.']));
-        save(); renderMessages(); return;
-      }
-      if (intent.set) Object.keys(intent.set).forEach(k => { state.flags[k]=intent.set[k]; });
-      addMessage(contact.id,'them',pick(intent.responses || intent.response || '...'));
-      save(); renderMessages(); scheduleEvents();
+    function answer(contact,intent,reply) {
+      if (intent && intent.set) Object.keys(intent.set).forEach(k => { state.flags[k]=intent.set[k]; });
+      addMessage(contact.id,'them',reply);
+      save(); renderMessages();
+      if (intent) scheduleEvents();
     }
     function sendMessage() {
       const text=input.value.trim(); if (!text) return;
-      const contact=getContact(state.activeContact); addMessage(contact.id,'me',text); input.value=''; renderMessages();
+      const contact=getContact(state.activeContact);
+      const intent=findIntent(contact,text);
+      const reply=pick(intent ? (intent.responses || intent.response || '...') : (contact.fallback || config.fallback || ['Не понял сообщение. Попробуй иначе.']));
+      addMessage(contact.id,'me',text); input.value=''; renderMessages();
       $('#rfm-typing').textContent=(contact.name || 'Собеседник')+' печатает…';
       if (typingTimer) clearTimeout(typingTimer);
-      const delayCfg = config.replyDelay || [1400,3200];
-      const delay = Array.isArray(delayCfg) ? delayCfg[0] + Math.random()*(delayCfg[1]-delayCfg[0]) : Number(delayCfg);
-      typingTimer=setTimeout(() => { $('#rfm-typing').textContent=''; answer(contact,text); },delay);
+      // Чем длиннее ответ, тем больше времени требуется на его набор.
+      const length=String(reply && reply.text ? reply.text : reply || '').length;
+      const minDelay=Math.min(3000 + length*35, 11500);
+      const delay=minDelay + 1800 + Math.random()*1800;
+      typingTimer=setTimeout(() => {
+        $('#rfm-typing').textContent='';
+        answer(contact,intent,reply);
+      },delay);
     }
     $('#rfm-compose').addEventListener('submit',e=>{e.preventDefault();sendMessage();});
     input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
