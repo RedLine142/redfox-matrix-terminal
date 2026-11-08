@@ -36,11 +36,20 @@
         name = 'text' + taskNumber;
       }
 
+      var itemNode = link.closest('.item');
+      var progressSource = itemNode ? itemNode.textContent : link.textContent;
+      var progressMatch = progressSource.match(/(\\d+)\\s*\\/\\s*(\\d+)/);
+      var progressBar = itemNode ? itemNode.querySelector('.progress .progress-bar, .progress-bar') : null;
+      var progressPercent = progressBar ? parseFloat(progressBar.style.width) : null;
+
       entries.push({
         name: name,
         label: label,
         href: href,
-        info: isInfo
+        info: isInfo,
+        found: progressMatch ? parseInt(progressMatch[1], 10) : null,
+        total: progressMatch ? parseInt(progressMatch[2], 10) : null,
+        percent: Number.isFinite(progressPercent) ? progressPercent : null
       });
     });
 
@@ -72,6 +81,9 @@
     var input = root.querySelector('#mx-command');
     var screen = root.querySelector('#mx-screen');
     var clock = root.querySelector('#mx-clock');
+    input.disabled = true;
+    form.style.opacity = '0';
+    form.style.pointerEvents = 'none';
     startDigitalRain(screen, root.querySelector('#mx-rain'), false);
 
     var pageRain = document.createElement('canvas');
@@ -127,6 +139,53 @@
         return;
       }
 
+      if (lower === 'whoami') {
+        line('USER: ' + teamName, 'mx-success');
+        line('SESSION: REDFOX QUEST', 'mx-dim');
+        line('GAME: ' + (headingNode ? headingNode.textContent.trim() : 'UNKNOWN'));
+        return;
+      }
+
+      if (lower === 'date') {
+        line('SYSTEM DATE: ' + new Date().toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }), 'mx-success');
+        return;
+      }
+
+      if (lower === 'time') {
+        line('SYSTEM TIME: ' + new Date().toLocaleTimeString('ru-RU'), 'mx-success');
+        return;
+      }
+
+      if (lower === 'status') {
+        var levels = entries.filter(function (item) { return !item.info; });
+        if (!levels.length) {
+          line('NO LEVEL DATA FOUND', 'mx-warning');
+          return;
+        }
+        line('REDFOX // LEVEL PROGRESS', 'mx-success');
+        line(' ');
+        levels.forEach(function (item) {
+          var found = item.found, total = item.total;
+          var hasCounts = Number.isFinite(found) && Number.isFinite(total) && total > 0;
+          var percent = hasCounts ? Math.max(0, Math.min(100, Math.round(found / total * 100))) : item.percent;
+          if (!Number.isFinite(percent)) percent = null;
+          var filled = percent === null ? 0 : Math.round(percent / 10);
+          var bar = percent === null ? '??????????' : '█'.repeat(filled) + '░'.repeat(10 - filled);
+          var count = hasCounts ? found + '/' + total : 'DATA N/A';
+          var pct = percent === null ? '' : '  ' + Math.round(percent) + '%';
+          line('[FILE] ' + item.name + '  ' + item.label + '  [' + bar + ']  ' + count + pct, 'mx-progress-line');
+        });
+        var known = levels.filter(function (item) { return Number.isFinite(item.found) && Number.isFinite(item.total); });
+        if (known.length) {
+          var sumFound = known.reduce(function (sum, item) { return sum + item.found; }, 0);
+          var sumTotal = known.reduce(function (sum, item) { return sum + item.total; }, 0);
+          line('TOTAL: ' + sumFound + ' / ' + sumTotal + ' CODES', 'mx-success');
+        } else {
+          line('PROGRESS COUNTERS NOT AVAILABLE', 'mx-warning');
+        }
+        return;
+      }
+
       if (lower === 'cls') {
         output.innerHTML = '';
         return;
@@ -144,6 +203,10 @@
         line('AVAILABLE COMMANDS:', 'mx-success');
         line('DIR                  - SHOW AVAILABLE LEVELS');
         line('PING                 - SHOW LEVEL INDEX AND LINKS');
+        line('WHOAMI               - SHOW TEAM AND GAME SESSION');
+        line('DATE                 - SHOW SYSTEM DATE');
+        line('TIME                 - SHOW SYSTEM TIME');
+        line('STATUS               - SHOW CODE PROGRESS BY LEVEL');
         line('CD RF:\\text1          - OPEN LEVEL');
         line('CD RF:\\info           - GAME INFORMATION');
         line('CLS                  - CLEAR TERMINAL');
@@ -179,13 +242,42 @@
       line('TYPE HELP TO VIEW AVAILABLE COMMANDS', 'mx-dim');
     }
 
-    line('MATRIX TERMINAL // REDFOX QUEST', 'mx-success');
-    line('ESTABLISHING SECURE CONNECTION...', 'mx-dim');
-    line('CONNECTION ESTABLISHED', 'mx-success');
-    blank();
-    line('Wake up, ' + teamName + '...', 'mx-wakeup');
-    line('The Matrix has you.', 'mx-dim');
-    blank();
+    var bootLines = [
+      { text: 'MATRIX BIOS // REDFOX TERMINAL v1.1', style: 'mx-success' },
+      { text: 'CHECKING REDFOX LINK ............ OK', style: 'mx-dim' },
+      { text: 'LOADING TERMINAL MODULES ....... OK', style: 'mx-dim' },
+      { text: 'INDEXING GAME DIRECTORIES ...... ' + entries.length + ' FOUND', style: 'mx-dim' },
+      { text: 'SECURE CONNECTION ESTABLISHED', style: 'mx-success' },
+      { text: 'WAKE UP, ' + teamName + '...', style: 'mx-wakeup' },
+      { text: 'THE MATRIX HAS YOU.', style: 'mx-success' }
+    ];
+
+    function typeBootLine(index) {
+      if (index >= bootLines.length) {
+        blank();
+        input.disabled = false;
+        form.style.opacity = '1';
+        form.style.pointerEvents = 'auto';
+        input.focus();
+        return;
+      }
+      var boot = bootLines[index];
+      var row = document.createElement('div');
+      row.className = 'mx-line ' + boot.style;
+      output.appendChild(row);
+      var position = 0;
+      function typeCharacter() {
+        if (position < boot.text.length) {
+          row.textContent += boot.text.charAt(position++);
+          screen.scrollTop = screen.scrollHeight;
+          window.setTimeout(typeCharacter, 8);
+        } else {
+          window.setTimeout(function () { typeBootLine(index + 1); }, 105);
+        }
+      }
+      typeCharacter();
+    }
+    typeBootLine(0);
 
     form.addEventListener('submit', function (event) {
       event.preventDefault();
@@ -267,7 +359,7 @@
       '.mx-status i{display:inline-block;width:7px;height:7px;margin-right:7px;border-radius:50%;background:#42ff78;box-shadow:0 0 9px #42ff78;}',
       '.mx-screen{position:relative;height:390px;overflow-y:auto;padding:18px 20px 12px;background:repeating-linear-gradient(0deg,rgba(0,255,90,.018) 0,rgba(0,255,90,.018) 1px,transparent 1px,transparent 4px),radial-gradient(ellipse at 50% 0%,rgba(0,90,35,.16),transparent 72%);}',
       '.mx-rain{position:absolute;inset:0;width:100%;height:100%;opacity:.34;pointer-events:none;z-index:0;}.mx-output{position:relative;z-index:1;min-height:100%;font-size:14px;line-height:1.65;overflow-wrap:anywhere;}',
-      '.mx-line{min-height:1.65em;color:#8affaa;white-space:pre-wrap;}',
+      '.mx-line{min-height:1.65em;color:#8affaa;white-space:pre-wrap;}.mx-progress-line{font-size:12px;color:#9dffb4;letter-spacing:.1px;}',
       '.mx-dim{color:#43895a;}.mx-success{color:#65ff91;text-shadow:0 0 7px rgba(0,255,90,.3);}.mx-warning{color:#d2ed70;}.mx-error{color:#ff6868;}.mx-hint{color:#54c979;}.mx-command-echo{color:#d4ffdf;}.mx-wakeup{margin:5px 0;color:#baffc9;font-size:20px;font-weight:bold;letter-spacing:1px;text-shadow:0 0 12px rgba(0,255,90,.55);}',
       '.mx-input-line{display:flex;align-items:center;gap:9px;padding:13px 18px;border-top:1px solid #14552a;background:#001407;}',
       '.mx-input-line label{color:#65ff91;white-space:nowrap;font-size:14px;}',
