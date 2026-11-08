@@ -127,7 +127,7 @@
       entries.forEach(function (entry) {
         var prefix = entry.info ? '[INFO] ' : '[FILE] ';
         line(prefix + entry.name + '    ' + entry.label);
-        if (withPing) line('  ' + entry.href, 'mx-dim');
+        if (withPing) line('  CD RF:\\' + entry.name, 'mx-dim');
       });
       line(' ');
       line(entries.length + ' ITEM(S)', 'mx-success');
