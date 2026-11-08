@@ -161,7 +161,7 @@
         line('DECRYPTING VAULT.DAT ............ OK', 'mb-success');
         blank();
         line('ПРОТОКОЛ ЗАЩИТЫ УСПЕШНО ОБОЙДЕН.', 'mb-success');
-        line('ФИНАЛЬНЫЙ КОД ДЛЯ REДFOX:', 'mb-warning');
+        line('ФИНАЛЬНЫЙ КОД ДЛЯ REDFOX:', 'mb-warning');
         line(FINAL_CODE, 'mb-final');
         blank();
         line('ВВЕДИ ЭТОТ КОД В ОСНОВНОЕ ПОЛЕ REDFOX.', 'mb-success');
