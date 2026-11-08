@@ -381,7 +381,7 @@
       ctx.font = '12px monospace';
       for (var i = 0; i < columns; i++) {
         var y = drops[i] * 17;
-        ctx.fillStyle = Math.random() > .98 ? 'rgba(220,255,225,.95)' : 'rgba(55,235,105,.62)';
+        ctx.fillStyle = Math.random() > .98 ? (root.classList.contains('mb-flynn') ? 'rgba(220,255,255,.98)' : 'rgba(220,255,225,.95)') : (root.classList.contains('mb-flynn') ? 'rgba(0,247,255,.68)' : 'rgba(55,235,105,.62)');
         ctx.fillText(glyphs.charAt(Math.floor(Math.random() * glyphs.length)), i * 17, y);
         if (y > h && Math.random() > .975) drops[i] = 0;
         drops[i] += .24 + Math.random() * .22;
