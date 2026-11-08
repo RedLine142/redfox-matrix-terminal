@@ -77,7 +77,8 @@
     var clock = document.createElement('div');
     clock.className = 'mt-clock';
     clock.innerHTML = '<span class="mt-clock-label">LOCAL SYSTEM TIME</span><strong></strong>';
-    if (tabs) tabs.appendChild(clock);
+    var tabsInner = tabs && tabs.querySelector('.wrapper');
+    if (tabsInner) tabsInner.appendChild(clock);
     else document.body.appendChild(clock);
 
     function updateClock() {
