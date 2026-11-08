@@ -126,7 +126,7 @@
           flynnState = 'backdoor-open';
           return;
         }
-        if (lower === 'llsdl lasercontrol -ok 1' && flynnState === 'backdoor-open') {
+        if (lower === 'llsdlasercontrol -ok 1' && flynnState === 'backdoor-open') {
           line('Launch Laser ?', 'mb-final');
           line('Y / N', 'mb-warning');
           flynnState = 'laser';
