@@ -82,7 +82,7 @@
     root.id = 'rfm-root';
     root.innerHTML = '<button id="rfm-launch" type="button">✉ &nbsp; '+esc(config.launchLabel || 'ОТКРЫТЬ МЕССЕНДЖЕР')+'</button>'+
       '<section id="rfm-panel" aria-label="Игровой мессенджер"><header id="rfm-top"><div><div id="rfm-brand">'+esc(config.title || 'SECURE MESSENGER')+'</div><div id="rfm-subtitle">'+esc(config.subtitle || 'ЗАЩИЩЁННЫЙ КАНАЛ СВЯЗИ')+'</div></div><div id="rfm-actions"><button class="rfm-iconbtn" id="rfm-reset" title="Начать диалог заново">↻</button><button class="rfm-iconbtn" id="rfm-close" title="Закрыть">✕</button></div></header>'+
-      '<div id="rfm-main"><nav id="rfm-contacts" aria-label="Контакты"></nav><section id="rfm-chat"><div id="rfm-chathead"><div id="rfm-chatname"></div><div id="rfm-chatdesc"></div></div><div id="rfm-messages"></div><div id="rfm-typing"></div><div id="rfm-suggestions"></div><form id="rfm-compose"><textarea id="rfm-input" maxlength="600" placeholder="Напишите сообщение..." aria-label="Сообщение"></textarea><button id="rfm-send" type="submit">➤</button></form></section></div></section>';
+      '<div id="rfm-main"><nav id="rfm-contacts" aria-label="Контакты"></nav><section id="rfm-chat"><div id="rfm-chathead"><div id="rfm-chatname"></div><div id="rfm-chatdesc"></div></div><div id="rfm-messages"></div><div id="rfm-typing"></div><form id="rfm-compose"><textarea id="rfm-input" maxlength="600" placeholder="Напишите сообщение..." aria-label="Сообщение"></textarea><button id="rfm-send" type="submit">➤</button></form></section></div></section>';
     document.body.appendChild(root);
 
     const $ = selector => root.querySelector(selector);
@@ -107,11 +107,6 @@
         return '<div class="rfm-msg '+(m.from==='me'?'me':'them')+'">'+esc(m.text).replace(/\n/g,'<br>')+attachment+'<span class="rfm-time">'+esc(m.time)+'</span></div>';
       }).join('');
       messageBox.scrollTop = messageBox.scrollHeight;
-    }
-    function renderSuggestions() {
-      const prompts = getContact(state.activeContact).suggestions || [];
-      $('#rfm-suggestions').innerHTML = prompts.map(p => '<button type="button" class="rfm-suggest" data-prompt="'+esc(p)+'">'+esc(p)+'</button>').join('');
-      $('#rfm-suggestions').querySelectorAll('[data-prompt]').forEach(button => button.addEventListener('click',() => { input.value=button.getAttribute('data-prompt'); sendMessage(); }));
     }
     function render() {
       const c = getContact(state.activeContact);
