@@ -58,7 +58,7 @@
           '<div class="mx-output" id="mx-output"></div>' +
         '</div>' +
         '<form class="mx-input-line" id="mx-form" autocomplete="off">' +
-          '<label for="mx-command">C:\\\\REDFOX&gt;</label>' +
+          '<label for="mx-command">C:\\REDFOX&gt;</label>' +
           '<input id="mx-command" name="command" type="text" spellcheck="false" autocapitalize="off" autocomplete="off" autofocus aria-label="Введите команду">' +
           '<span class="mx-cursor"></span>' +
         '</form>' +
@@ -91,7 +91,7 @@
         return;
       }
 
-      line(withPing ? 'PING DIRECTORY INDEX...' : 'DIRECTORY OF C:\\\\REDFOX', 'mx-dim');
+      line(withPing ? 'PING DIRECTORY INDEX...' : 'DIRECTORY OF C:\\REDFOX', 'mx-dim');
       line(' ');
       entries.forEach(function (entry) {
         var prefix = entry.info ? '[INFO] ' : '[FILE] ';
@@ -106,7 +106,7 @@
       var command = raw.trim();
       if (!command) return;
 
-      line('C:\\\\REDFOX> ' + command, 'mx-command-echo');
+      line('C:\\REDFOX> ' + command, 'mx-command-echo');
 
       var lower = command.toLowerCase();
 
@@ -137,8 +137,8 @@
         line('AVAILABLE COMMANDS:', 'mx-success');
         line('DIR                  - SHOW AVAILABLE LEVELS');
         line('PING                 - SHOW LEVEL INDEX AND LINKS');
-        line('CD C:\\\\text1          - OPEN LEVEL');
-        line('CHDIR C:\\\\text1       - OPEN LEVEL (ALIAS)');
+        line('CD C:\\text1          - OPEN LEVEL');
+        line('CHDIR C:\\text1       - OPEN LEVEL (ALIAS)');
         line('CLS                  - CLEAR TERMINAL');
         line('SHUTDOWN             - RELOAD PAGE');
         line('HELP                 - SHOW THIS HELP');
@@ -147,9 +147,9 @@
 
       var match = command.match(/^(?:cd|chdir)\s+(.+)$/i);
       if (match) {
-        var target = match[1].trim().replace(/\//g, '\\\\').replace(/^["']|["']$/g, '');
-        target = target.replace(/^C:\\\\?/i, '').replace(/^\\\\+/, '').toLowerCase();
-        var requested = target.split('\\\\').filter(Boolean).pop();
+        var target = match[1].trim().replace(/\//g, '\\').replace(/^["']|["']$/g, '');
+        target = target.replace(/^C:\\?/i, '').replace(/^\\+/, '').toLowerCase();
+        var requested = target.split('\\').filter(Boolean).pop();
 
         var entry = entries.find(function (item) {
           return item.name.toLowerCase() === requested;
