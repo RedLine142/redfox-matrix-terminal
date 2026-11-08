@@ -143,6 +143,7 @@
       if (lower === 'whoami') {
         line('Выдано имя пользователя', 'mb-success');
         terminalMode = 'FLYNN';
+        root.classList.add('mb-flynn');
         flynnState = 'identity';
         promptLabel.textContent = 'FLYNN:\\>';
         levelLabel.textContent = 'SESSION: FLYNN';
@@ -314,7 +315,7 @@
     function updateClock() { clock.textContent = new Date().toLocaleTimeString('ru-RU'); }
     updateClock();
     window.setInterval(updateClock, 1000);
-    startRain(root.querySelector('canvas'), screen);
+    startRain(root.querySelector('canvas'), screen, root);
 
     var boot = [
       ['MATRIX BIOS // SECURITY BREACH SIMULATOR', 'mb-success'],
@@ -344,6 +345,7 @@
       stage = 0;
       adminClueRead = false;
       terminalMode = 'SYSTEM';
+      root.classList.remove('mb-flynn');
       flynnState = 'idle';
       promptLabel.textContent = 'SYSTEM:\\>';
       levelLabel.textContent = 'ACCESS: LOCKED';
@@ -359,7 +361,7 @@
     startBoot();
   }
 
-  function startRain(canvas, screen) {
+  function startRain(canvas, screen, root) {
     if (!canvas || !canvas.getContext) return;
     var ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -403,6 +405,26 @@
       '.mb-line{min-height:1.5em;white-space:pre-wrap;overflow-wrap:anywhere;color:#a4ffb8;}.mb-echo{margin-top:7px;color:#e0ffe7;}.mb-dim{color:#57966a;}.mb-success{color:#75ff9b;text-shadow:0 0 8px rgba(0,255,90,.35);}.mb-warning{color:#c6e879;}.mb-error{color:#ff6b6b;}.mb-final{margin:8px 0;padding:10px 14px;border:1px solid #4cff82;background:rgba(0,80,25,.35);color:#eaffef;font-size:20px;font-weight:bold;letter-spacing:3px;text-shadow:0 0 12px #39ff72;}',
       '.mb-command{display:flex;align-items:center;gap:8px;padding:13px 16px;border-top:1px solid #176332;background:rgba(0,15,5,.98);}.mb-command label{color:#76ff9b;white-space:nowrap;font-size:13px;}.mb-command input{flex:1;min-width:0;border:0!important;outline:0!important;background:transparent!important;color:#d4ffe0!important;font:14px Consolas,"Courier New",monospace!important;box-shadow:none!important;}.mb-command input::placeholder{color:#39794e;}.mb-cursor{width:8px;height:16px;background:#58ff83;animation:mbblink 1s steps(2,start) infinite;order:3;}@keyframes mbblink{to{visibility:hidden;}}',
       '.mb-footer{border-top:1px solid #14552a;border-bottom:0;color:#57966a;font-size:9px;padding:10px 16px;}',
+      '#'+ROOT_ID+'.mb-flynn{color:#00F7FF;}',
+      '#'+ROOT_ID+'.mb-flynn .mb-shell{border-color:#007f89;background:rgba(0,8,12,.92);box-shadow:0 0 35px rgba(0,247,255,.16),inset 0 0 35px rgba(0,247,255,.06);}',
+      '#'+ROOT_ID+'.mb-flynn .mb-topbar,#'+ROOT_ID+'.mb-flynn .mb-meta,#'+ROOT_ID+'.mb-flynn .mb-footer{background:rgba(0,25,31,.92);border-color:#006d78;color:#00b9c5;}',
+      '#'+ROOT_ID+'.mb-flynn .mb-brand{color:#b9fcff;text-shadow:0 0 8px rgba(0,247,255,.55);}',
+      '#'+ROOT_ID+'.mb-flynn .mb-online{color:#00dce8;}',
+      '#'+ROOT_ID+'.mb-flynn .mb-online i{background:#00f7ff;box-shadow:0 0 9px #00f7ff;}',
+      '#'+ROOT_ID+'.mb-flynn .mb-screen{background:rgba(0,8,12,.42);scrollbar-color:#007f89 #02090c;}',
+      '#'+ROOT_ID+'.mb-flynn .mb-output{text-shadow:0 0 5px rgba(0,247,255,.22);}',
+      '#'+ROOT_ID+'.mb-flynn .mb-line{color:#a9fbff;}',
+      '#'+ROOT_ID+'.mb-flynn .mb-echo{color:#e0feff;}',
+      '#'+ROOT_ID+'.mb-flynn .mb-dim{color:#559da3;}',
+      '#'+ROOT_ID+'.mb-flynn .mb-success{color:#00f7ff;text-shadow:0 0 8px rgba(0,247,255,.48);}',
+      '#'+ROOT_ID+'.mb-flynn .mb-warning{color:#8afaff;}',
+      '#'+ROOT_ID+'.mb-flynn .mb-error{color:#ff8585;}',
+      '#'+ROOT_ID+'.mb-flynn .mb-final{border-color:#00f7ff;background:rgba(0,105,115,.28);color:#e8feff;text-shadow:0 0 12px #00dce8;}',
+      '#'+ROOT_ID+'.mb-flynn .mb-command{border-color:#007f89;background:rgba(0,15,20,.98);}',
+      '#'+ROOT_ID+'.mb-flynn .mb-command label{color:#00f7ff;}',
+      '#'+ROOT_ID+'.mb-flynn .mb-command input{color:#d4feff!important;}',
+      '#'+ROOT_ID+'.mb-flynn .mb-command input::placeholder{color:#397e84;}',
+      '#'+ROOT_ID+'.mb-flynn .mb-cursor{background:#00f7ff;}',
       '.fixed-top{z-index:60!important;}.fixed-top form.enter{background:rgba(0,10,4,.96)!important;}',
       '@media(min-width:768px){.mb-shell{height:calc(100vh - 260px);min-height:540px;}.mb-screen{padding:24px 28px;}.mb-output{font-size:14px;}}',
       '@media(max-width:767px){#'+ROOT_ID+'{margin:10px 0 100px;}.mb-shell{height:62vh;min-height:430px;max-height:none;}.mb-topbar,.mb-meta,.mb-footer{padding:10px;font-size:8px;letter-spacing:.6px;}.mb-online{font-size:7px;}.mb-screen{padding:14px 12px;}.mb-output{font-size:12px;}.mb-command{padding:12px 10px;gap:6px;}.mb-command label,.mb-command input{font-size:12px!important;}.mb-final{font-size:17px;}}'
