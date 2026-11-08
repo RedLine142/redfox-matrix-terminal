@@ -197,7 +197,16 @@
       intro(getContact(state.activeContact));save();render();
     });
     document.addEventListener('keydown',e=>{if(e.key==='Escape')panel.classList.remove('rfm-open');});
-    intro(getContact(state.activeContact)); save(); render();
+    // При первом запуске создаём входящие для всех стартовых контактов.
+    // Сообщения в неактивном чате сразу отмечаются как непрочитанные.
+    config.contacts.filter(c => !c.unlockFlag).forEach(c => {
+      const hadMessages = state.messages.some(m => m.contactId === c.id);
+      intro(c);
+      if (c.id !== state.activeContact && !hadMessages && (c.intro || []).length) {
+        state.unread[c.id] = true;
+      }
+    });
+    save(); render();
     if(config.autoOpen) panel.classList.add('rfm-open');
     console.info('[RedFox Messenger] '+VERSION+' / '+config.id);
   }
