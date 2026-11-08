@@ -169,20 +169,50 @@
           var hasCounts = Number.isFinite(found) && Number.isFinite(total) && total > 0;
           var percent = hasCounts ? Math.max(0, Math.min(100, Math.round(found / total * 100))) : item.percent;
           if (!Number.isFinite(percent)) percent = null;
-          var filled = percent === null ? 0 : Math.round(percent / 10);
-          var bar = percent === null ? '??????????' : '█'.repeat(filled) + '░'.repeat(10 - filled);
-          var count = hasCounts ? found + '/' + total : 'DATA N/A';
-          var pct = percent === null ? '' : '  ' + Math.round(percent) + '%';
-          line('[FILE] ' + item.name + '  ' + item.label + '  [' + bar + ']  ' + count + pct, 'mx-progress-line');
+
+          var card = document.createElement('div');
+          card.className = 'mx-status-card';
+
+          var head = document.createElement('div');
+          head.className = 'mx-status-head';
+          var name = document.createElement('span');
+          name.className = 'mx-status-name';
+          name.textContent = item.name.toUpperCase() + '  //  ' + item.label;
+          var value = document.createElement('span');
+          value.className = 'mx-status-value';
+          value.textContent = percent === null ? 'NO DATA' : Math.round(percent) + '%';
+          head.appendChild(name);
+          head.appendChild(value);
+          card.appendChild(head);
+
+          var track = document.createElement('div');
+          track.className = 'mx-status-track' + (percent === null ? ' is-unknown' : '');
+          var fill = document.createElement('div');
+          fill.className = 'mx-status-fill';
+          fill.style.width = (percent === null ? 0 : percent) + '%';
+          track.appendChild(fill);
+          card.appendChild(track);
+
+          var meta = document.createElement('div');
+          meta.className = 'mx-status-meta';
+          meta.textContent = hasCounts ? 'CODES FOUND  ' + found + ' / ' + total : (percent === null ? 'PROGRESS DATA UNAVAILABLE' : 'LEVEL COMPLETION');
+          card.appendChild(meta);
+          output.appendChild(card);
         });
+
         var known = levels.filter(function (item) { return Number.isFinite(item.found) && Number.isFinite(item.total); });
         if (known.length) {
           var sumFound = known.reduce(function (sum, item) { return sum + item.found; }, 0);
           var sumTotal = known.reduce(function (sum, item) { return sum + item.total; }, 0);
-          line('TOTAL: ' + sumFound + ' / ' + sumTotal + ' CODES', 'mx-success');
+          var totalPercent = sumTotal > 0 ? Math.round(sumFound / sumTotal * 100) : 0;
+          var summary = document.createElement('div');
+          summary.className = 'mx-status-summary';
+          summary.textContent = 'TOTAL PROGRESS  ' + totalPercent + '%  //  ' + sumFound + ' OF ' + sumTotal + ' CODES';
+          output.appendChild(summary);
         } else {
           line('PROGRESS COUNTERS NOT AVAILABLE', 'mx-warning');
         }
+        screen.scrollTop = screen.scrollHeight;
         return;
       }
 
@@ -360,6 +390,15 @@
       '.mx-screen{position:relative;height:390px;overflow-y:auto;padding:18px 20px 12px;background:repeating-linear-gradient(0deg,rgba(0,255,90,.018) 0,rgba(0,255,90,.018) 1px,transparent 1px,transparent 4px),radial-gradient(ellipse at 50% 0%,rgba(0,90,35,.16),transparent 72%);}',
       '.mx-rain{position:absolute;inset:0;width:100%;height:100%;opacity:.34;pointer-events:none;z-index:0;}.mx-output{position:relative;z-index:1;min-height:100%;font-size:14px;line-height:1.65;overflow-wrap:anywhere;}',
       '.mx-line{min-height:1.65em;color:#8affaa;white-space:pre-wrap;}.mx-progress-line{font-size:12px;color:#9dffb4;letter-spacing:.1px;}',
+      '.mx-status-card{position:relative;margin:9px 0 12px;padding:11px 13px 10px;border:1px solid rgba(55,190,95,.24);border-left:2px solid #39c96b;background:linear-gradient(100deg,rgba(0,42,17,.72),rgba(0,15,6,.58));box-shadow:inset 0 0 18px rgba(0,255,90,.035);}',
+      '.mx-status-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:9px;}',
+      '.mx-status-name{min-width:0;color:#baffc9;font-size:12px;font-weight:bold;letter-spacing:.5px;overflow-wrap:anywhere;}',
+      '.mx-status-value{flex:none;color:#75ff9b;font-size:13px;font-weight:bold;text-shadow:0 0 8px rgba(0,255,90,.35);}',
+      '.mx-status-track{height:9px;padding:1px;overflow:hidden;border:1px solid #245d36;background:#001b0a;box-shadow:inset 0 0 6px rgba(0,0,0,.8);}',
+      '.mx-status-fill{height:100%;background:linear-gradient(90deg,#147a38,#42ff78);box-shadow:0 0 9px rgba(50,255,110,.55);transition:width .35s ease;}',
+      '.mx-status-track.is-unknown{background:repeating-linear-gradient(135deg,#102719 0,#102719 5px,#07170d 5px,#07170d 10px);border-color:#25452f;}',
+      '.mx-status-meta{margin-top:7px;color:#57966a;font-size:10px;letter-spacing:1px;}',
+      '.mx-status-summary{margin-top:16px;padding:12px;border-top:1px solid #27643a;border-bottom:1px solid #27643a;color:#aaffbf;font-size:12px;font-weight:bold;letter-spacing:1px;text-align:right;background:rgba(0,45,15,.38);}',
       '.mx-dim{color:#43895a;}.mx-success{color:#65ff91;text-shadow:0 0 7px rgba(0,255,90,.3);}.mx-warning{color:#d2ed70;}.mx-error{color:#ff6868;}.mx-hint{color:#54c979;}.mx-command-echo{color:#d4ffdf;}.mx-wakeup{margin:5px 0;color:#baffc9;font-size:20px;font-weight:bold;letter-spacing:1px;text-shadow:0 0 12px rgba(0,255,90,.55);}',
       '.mx-input-line{display:flex;align-items:center;gap:9px;padding:13px 18px;border-top:1px solid #14552a;background:#001407;}',
       '.mx-input-line label{color:#65ff91;white-space:nowrap;font-size:14px;}',
