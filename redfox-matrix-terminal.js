@@ -350,7 +350,7 @@
     var columns = 0;
     var width = 0;
     var height = 0;
-    var glyphs = 'アカサタナハマヤラワ012345789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    var glyphs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0123456789';
 
     function resize() {
       var rect = screen.getBoundingClientRect();
@@ -373,7 +373,7 @@
         ctx.fillStyle = Math.random() > 0.975 ? 'rgba(190,255,205,.9)' : 'rgba(35,220,90,.55)';
         ctx.fillText(glyph, i * 16, y);
         if (y > height && Math.random() > 0.975) drops[i] = 0;
-        drops[i] += (0.45 + Math.random() * 0.55) * 0.5;
+        drops[i] += (0.45 + Math.random() * 0.55) * 0.4;
       }
       window.requestAnimationFrame(draw);
     }
