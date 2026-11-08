@@ -49,6 +49,7 @@
     var levelLabel = root.querySelector('#mb-level');
     var clock = root.querySelector('#mb-clock');
     var stage = 0;
+    var adminClueRead = false;
     var history = [];
     var historyIndex = 0;
 
@@ -76,6 +77,8 @@
         line('AUTH GUEST <КЛЮЧ>    — ПОЛУЧИТЬ GUEST');
         line('LS                   — СПИСОК ФАЙЛОВ');
         line('CAT USER.KEY         — ПРОЧИТАТЬ ФАЙЛ ДОСТУПА');
+        line('CAT TRACE.LOG        — ПРОЧИТАТЬ ЖУРНАЛ ПЕРЕХВАТА');
+        line('CAT ADMIN.AUDIT       — ПРОЧИТАТЬ АУДИТ (USER)');
         line('AUTH USER <КЛЮЧ>     — ПОЛУЧИТЬ USER');
         line('AUDIT                — ПРОВЕРИТЬ ЗАЩИТУ');
         line('EXPLOIT <КЛЮЧ>       — ИСПОЛЬЗОВАТЬ УЯЗВИМОСТЬ');
@@ -93,7 +96,8 @@
       if (lower === 'scan') {
         line('СКАНИРОВАНИЕ СЕТЕВОГО УЗЛА...', 'mb-dim');
         line('НАЙДЕН ЗАКРЫТЫЙ ШЛЮЗ GUEST', 'mb-success');
-        line('ПОДСКАЗКА: КЛЮЧ — РЕЗУЛЬТАТ УМНОЖЕНИЯ 7 НА 8.', 'mb-warning');
+        line('ПОДСКАЗКА: НАЙДИ СЛЕДУЮЩЕЕ ЧИСЛО В РЯДУ: 3, 8, 15, 24, 35, ?', 'mb-warning');
+        line('РАЗНИЦА МЕЖДУ СОСЕДНИМИ ЧИСЛАМИ КАЖДЫЙ РАЗ РАСТЁТ НА 2.', 'mb-dim');
         line('AUTH GUEST <КЛЮЧ>', 'mb-dim');
         return;
       }
@@ -102,6 +106,7 @@
         line('DIRECTORY // /GUEST/', 'mb-success');
         line('[FILE] welcome.log');
         line('[FILE] user.key');
+        line('[FILE] trace.log');
         if (stage >= 2) line('[FILE] admin.audit');
         if (stage >= 3) line('[FILE] vault.dat');
         return;
@@ -115,20 +120,39 @@
       if (lower === 'cat user.key' || lower === 'type user.key') {
         if (stage < 1) { line('ACCESS DENIED // GUEST REQUIRED', 'mb-error'); return; }
         line('USER AUTH TOKEN // DAMAGED RECORD', 'mb-warning');
-        line('КЛЮЧ ЗАПИСАН В ОБРАТНОМ ПОРЯДКЕ: 3 1 4 2', 'mb-success');
-        line('ВОССТАНОВИ ПРАВИЛЬНУЮ ПОСЛЕДОВАТЕЛЬНОСТЬ.', 'mb-dim');
+        line('ЦИФРЫ ТОКЕНА: 7 2 9 4', 'mb-success');
+        line('ПОРЯДОК ЦИФР НЕ СОВПАДАЕТ С ПОРЯДКОМ ПОЗИЦИЙ.', 'mb-dim');
+        line('ИЩИ ПОРЯДОК ПОЗИЦИЙ В TRACE.LOG.', 'mb-warning');
+        return;
+      }
+      if (lower === 'cat trace.log' || lower === 'type trace.log') {
+        if (stage < 1) { line('ACCESS DENIED // GUEST REQUIRED', 'mb-error'); return; }
+        line('TRACE // PACKET RECONSTRUCTION', 'mb-success');
+        line('СОБЕРИ ТОКЕН, ЧИТАЯ ЦИФРЫ ИЗ USER.KEY В ПОРЯДКЕ ПОЗИЦИЙ:', 'mb-dim');
+        line('3 → 1 → 4 → 2', 'mb-warning');
+        return;
+      }
+      if (lower === 'cat admin.audit' || lower === 'type admin.audit') {
+        if (stage < 2) { line('ACCESS DENIED // USER PRIVILEGES REQUIRED', 'mb-error'); return; }
+        adminClueRead = true;
+        line('ADMIN AUDIT // FRAGMENT 07', 'mb-success');
+        line('ПОСЛЕДОВАТЕЛЬНОСТЬ: 2, 6, 12, 20, 30, ?', 'mb-warning');
+        line('КАЖДЫЙ ЧЛЕН — ПРОИЗВЕДЕНИЕ ДВУХ СОСЕДНИХ НАТУРАЛЬНЫХ ЧИСЕЛ.', 'mb-dim');
+        line('НАЙДИ СЛЕДУЮЩИЙ ЧЛЕН. ПОСЛЕ ЭТОГО ЗАПУСТИ AUDIT.', 'mb-dim');
         return;
       }
       if (lower === 'audit') {
         if (stage < 2) { line('ACCESS DENIED // USER PRIVILEGES REQUIRED', 'mb-error'); return; }
-        line('ADMIN GATE // WEAK SEQUENCE DETECTED', 'mb-warning');
-        line('АНАЛИЗ ПОСЛЕДОВАТЕЛЬНОСТИ: 3, 6, 12, 24, ?', 'mb-success');
-        line('НАЙДИ СЛЕДУЮЩЕЕ ЧИСЛО. ЗАТЕМ ПРИМЕНИ EXPLOIT.', 'mb-dim');
+        if (!adminClueRead) { line('СНАЧАЛА ПРОЧИТАЙ ADMIN.AUDIT.', 'mb-warning'); return; }
+        line('ADMIN GATE // PATTERN ANALYSIS READY', 'mb-warning');
+        line('ПОДСКАЗКА: ЭТО КВАДРАТЫ, УМНОЖЕННЫЕ НА СЛЕДУЮЩЕЕ ЧИСЛО.', 'mb-success');
+        line('2×3=6, 3×4=12, 4×5=20, 5×6=30...', 'mb-dim');
+        line('ПЕРЕДАЙ СЛЕДУЮЩЕЕ ЗНАЧЕНИЕ В EXPLOIT.', 'mb-dim');
         return;
       }
       if (lower.indexOf('auth guest ') === 0) {
         if (stage > 0) { line('GUEST ACCESS ALREADY GRANTED.', 'mb-warning'); return; }
-        if (command.slice(11).trim() === '56') {
+        if (command.slice(11).trim() === '48') {
           stage = 1; setLevel('GUEST');
           line('КЛЮЧ ПРИНЯТ. GUEST ACCESS GRANTED.', 'mb-success');
           line('ДОСТУПЕН КАТАЛОГ /GUEST/. ИСПОЛЬЗУЙ LS.', 'mb-dim');
@@ -138,7 +162,7 @@
       if (lower.indexOf('auth user ') === 0) {
         if (stage < 1) { line('СНАЧАЛА ПОЛУЧИ УРОВЕНЬ GUEST.', 'mb-error'); return; }
         if (stage >= 2) { line('USER ACCESS ALREADY GRANTED.', 'mb-warning'); return; }
-        if (command.slice(10).trim() === '2413') {
+        if (command.slice(10).trim() === '9742') {
           stage = 2; setLevel('USER');
           line('TOKEN VERIFIED. USER ACCESS GRANTED.', 'mb-success');
           line('ОБНАРУЖЕН СКРЫТЫЙ ADMIN GATE. ВЫПОЛНИ AUDIT.', 'mb-dim');
@@ -148,7 +172,7 @@
       if (lower.indexOf('exploit ') === 0) {
         if (stage < 2) { line('ОТКАЗАНО. НУЖНЫ ПРАВА USER.', 'mb-error'); return; }
         if (stage >= 3) { line('ADMIN ACCESS ALREADY GRANTED.', 'mb-warning'); return; }
-        if (command.slice(8).trim() === '48') {
+        if (command.slice(8).trim() === '42') {
           stage = 3; setLevel('ADMIN');
           line('VULNERABILITY EXPLOITED.', 'mb-success');
           line('ADMIN PRIVILEGES GRANTED. SECURITY WALL DISABLED.', 'mb-success');
