@@ -243,17 +243,17 @@
 
       if (lower === 'help') {
         line('AVAILABLE COMMANDS:', 'mx-success');
-        line('DIR                  - SHOW AVAILABLE LEVELS');
-        line('PING                 - SHOW LEVEL INDEX AND LINKS');
-        line('WHOAMI               - SHOW TEAM AND GAME SESSION');
-        line('DATE                 - SHOW SYSTEM DATE');
-        line('TIME                 - SHOW SYSTEM TIME');
-        line('STATUS               - SHOW CODE PROGRESS BY LEVEL');
-        line('CD RF:\\text1          - OPEN LEVEL');
-        line('CD RF:\\info           - GAME INFORMATION');
-        line('CLS                  - CLEAR TERMINAL');
-        line('RESTART              - RELOAD PAGE');
-        line('HELP                 - SHOW THIS HELP');
+        line('DIR                  - ПОКАЗАТЬ ДОСТУПНЫЕ УРОВНИ');
+        line('PING                 - ПОКАЗАТЬ СПИСОК УРОВНЕЙ');
+        line('WHOAMI               - ПОКАЗАТЬ КОМАНДУ И ИГРОВУЮ СЕССИЮ');
+        line('DATE                 - ПОКАЗАТЬ СИСТЕМНУЮ ДАТУ');
+        line('TIME                 - ПОКАЗАТЬ СИСТЕМНОЕ ВРЕМЯ');
+        line('STATUS               - ПОКАЗАТЬ ПРОГРЕСС ПО УРОВНЯМ');
+        line('CD RF:\\text1          - ОТКРЫТЬ УРОВЕНЬ');
+        line('CD RF:\\info           - ИНФОРМАЦИЯ ОБ ИГРЕ');
+        line('CLS                  - ОЧИСТИТЬ ТЕРМИНАЛ');
+        line('RESTART              - ПЕРЕЗАГРУЗИТЬ СТРАНИЦУ');
+        line('HELP                 - ПОКАЗАТЬ СПРАВКУ');
         return;
       }
 
