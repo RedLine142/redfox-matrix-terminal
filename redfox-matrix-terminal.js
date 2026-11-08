@@ -15,7 +15,6 @@
     var teamNode = container.querySelector('.team_name');
     var headingNode = container.querySelector('h1');
     var teamName = teamNode ? teamNode.textContent.replace(/^Команда:\s*/i, '').trim() : 'UNKNOWN';
-    var gameName = headingNode ? headingNode.textContent.trim() : 'RED FOX QUEST';
 
     var entries = [];
     var taskNumber = 0;
@@ -59,7 +58,7 @@
           '<div class="mx-output" id="mx-output"></div>' +
         '</div>' +
         '<form class="mx-input-line" id="mx-form" autocomplete="off">' +
-          '<label for="mx-command">C:\\REDFOX&gt;</label>' +
+          '<label for="mx-command">RedFox:\\RF&gt;</label>' +
           '<input id="mx-command" name="command" type="text" spellcheck="false" autocapitalize="off" autocomplete="off" autofocus aria-label="Введите команду">' +
           '<span class="mx-cursor"></span>' +
         '</form>' +
@@ -73,7 +72,13 @@
     var input = root.querySelector('#mx-command');
     var screen = root.querySelector('#mx-screen');
     var clock = root.querySelector('#mx-clock');
-    startDigitalRain(screen, root.querySelector('#mx-rain'));
+    startDigitalRain(screen, root.querySelector('#mx-rain'), false);
+
+    var pageRain = document.createElement('canvas');
+    pageRain.className = 'mx-page-rain';
+    pageRain.setAttribute('aria-hidden', 'true');
+    document.body.insertBefore(pageRain, document.body.firstChild);
+    startDigitalRain(document.body, pageRain, true);
 
     function line(text, className) {
       var row = document.createElement('div');
@@ -93,7 +98,7 @@
         return;
       }
 
-      line(withPing ? 'PING DIRECTORY INDEX...' : 'DIRECTORY OF C:\\REDFOX', 'mx-dim');
+      line(withPing ? 'PING DIRECTORY INDEX...' : 'DIRECTORY OF RF:\\', 'mx-dim');
       line(' ');
       entries.forEach(function (entry) {
         var prefix = entry.info ? '[INFO] ' : '[FILE] ';
@@ -108,7 +113,7 @@
       var command = raw.trim();
       if (!command) return;
 
-      line('C:\\REDFOX> ' + command, 'mx-command-echo');
+      line('RedFox:\\RF> ' + command, 'mx-command-echo');
 
       var lower = command.toLowerCase();
 
@@ -127,7 +132,7 @@
         return;
       }
 
-      if (lower === 'shutdown') {
+      if (lower === 'restart') {
         line('RESTARTING REDFOX SESSION...', 'mx-warning');
         window.setTimeout(function () {
           window.location.reload();
@@ -139,18 +144,18 @@
         line('AVAILABLE COMMANDS:', 'mx-success');
         line('DIR                  - SHOW AVAILABLE LEVELS');
         line('PING                 - SHOW LEVEL INDEX AND LINKS');
-        line('CD C:\\text1          - OPEN LEVEL');
-        line('CHDIR C:\\text1       - OPEN LEVEL (ALIAS)');
+        line('CD RF:\\text1          - OPEN LEVEL');
+        line('CD RF:\\info           - GAME INFORMATION');
         line('CLS                  - CLEAR TERMINAL');
-        line('SHUTDOWN             - RELOAD PAGE');
+        line('RESTART              - RELOAD PAGE');
         line('HELP                 - SHOW THIS HELP');
         return;
       }
 
-      var match = command.match(/^(?:cd|chdir)\s+(.+)$/i);
+      var match = command.match(/^cd\\s+(.+)$/i);
       if (match) {
         var target = match[1].trim().replace(/\//g, '\\').replace(/^["']|["']$/g, '');
-        target = target.replace(/^C:\\?/i, '').replace(/^\\+/, '').toLowerCase();
+        target = target.replace(/^RF:\\?/i, '').replace(/^\\+/, '').toLowerCase();
         var requested = target.split('\\').filter(Boolean).pop();
 
         var entry = entries.find(function (item) {
@@ -159,7 +164,7 @@
 
         if (!entry) {
           line('PATH NOT FOUND: ' + match[1], 'mx-error');
-          line('TYPE DIR TO VIEW AVAILABLE LEVELS', 'mx-dim');
+          line('USE: CD RF:\\text1 OR CD RF:\\info', 'mx-dim');
           return;
         }
 
@@ -180,9 +185,7 @@
     blank();
     line('Wake up, ' + teamName + '...', 'mx-wakeup');
     line('The Matrix has you.', 'mx-dim');
-    line('Game: ' + gameName, 'mx-dim');
     blank();
-    line('TYPE DIR TO LIST AVAILABLE LEVELS.', 'mx-hint');
 
     form.addEventListener('submit', function (event) {
       event.preventDefault();
@@ -205,7 +208,7 @@
     input.focus();
   }
 
-  function startDigitalRain(screen, canvas) {
+  function startDigitalRain(screen, canvas, fullPage) {
     if (!screen || !canvas || !canvas.getContext) return;
     var ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -217,8 +220,8 @@
 
     function resize() {
       var rect = screen.getBoundingClientRect();
-      width = Math.max(1, Math.floor(rect.width));
-      height = Math.max(1, Math.floor(rect.height));
+      width = Math.max(1, Math.floor(fullPage ? window.innerWidth : rect.width));
+      height = Math.max(1, Math.floor(fullPage ? window.innerHeight : rect.height));
       canvas.width = width;
       canvas.height = height;
       columns = Math.ceil(width / 16);
@@ -236,7 +239,7 @@
         ctx.fillStyle = Math.random() > 0.975 ? 'rgba(190,255,205,.9)' : 'rgba(35,220,90,.55)';
         ctx.fillText(glyph, i * 16, y);
         if (y > height && Math.random() > 0.975) drops[i] = 0;
-        drops[i] += 0.45 + Math.random() * 0.55;
+        drops[i] += (0.45 + Math.random() * 0.55) * 0.5;
       }
       window.requestAnimationFrame(draw);
     }
@@ -250,7 +253,12 @@
     if (document.getElementById(STYLE_ID)) return;
 
     var css = [
-      '.matrix-terminal-container{max-width:100%!important;padding:18px!important;background:#020804!important;border:1px solid #174b2b!important;box-shadow:0 0 35px rgba(0,255,90,.10),inset 0 0 35px rgba(0,255,90,.035)!important;color:#8affaa!important;font-family:Consolas,"Courier New",monospace!important;}',
+      'html,body{min-height:100%;background:#010603!important;color:#8affaa!important;}body{position:relative;}',
+      '.mx-page-rain{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none;opacity:.48;}',
+      'body>.wrapper,body>.wrapper .header,body>.wrapper .container,body>.wrapper .time,body>.wrapper .locations{position:relative;z-index:1;}',
+      '.header,.time,.locations{color:#65ff91!important;background:rgba(0,12,5,.58)!important;border-color:#14552a!important;}',
+      '.header a,.time a,.locations a{color:#8affaa!important;}',
+      '.matrix-terminal-container{max-width:100%!important;padding:18px!important;background:rgba(2,8,4,.88)!important;border:1px solid #174b2b!important;box-shadow:0 0 35px rgba(0,255,90,.10),inset 0 0 35px rgba(0,255,90,.035)!important;color:#8affaa!important;font-family:Consolas,"Courier New",monospace!important;}',
       '#matrix-terminal-root{width:100%;color:#8affaa;font-family:Consolas,"Courier New",monospace;}',
       '.mx-shell{position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(0,15,6,.98),rgba(0,5,2,.99));border:1px solid #176332;box-shadow:0 0 22px rgba(0,255,85,.12);}',
       '.mx-topbar{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 16px;border-bottom:1px solid #14552a;background:rgba(0,35,12,.65);font-size:12px;letter-spacing:2px;}',
