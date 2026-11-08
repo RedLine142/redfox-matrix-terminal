@@ -73,6 +73,26 @@
       line((terminalMode === 'FLYNN' ? 'FLYNN:\\> ' : 'SYSTEM:\\> ') + command, 'mb-echo');
       var lower = command.toLowerCase();
 
+      // WHOAMI is a global entry point to the hidden FLYNN branch.
+      // Handle it before the FLYNN state router so it cannot be swallowed
+      // by a restricted-state command guard.
+      if (lower === 'whoami') {
+        if (terminalMode !== 'FLYNN') {
+          line('Выдано имя пользователя', 'mb-success');
+          terminalMode = 'FLYNN';
+          root.classList.add('mb-flynn');
+          flynnState = 'identity';
+          promptLabel.textContent = 'FLYNN:\\>';
+          levelLabel.textContent = 'SESSION: FLYNN';
+          line('СЕАНС FLYNN ОТКРЫТ.', 'mb-success');
+          line('ВВЕДИ UNAME -A ДЛЯ ПРОДОЛЖЕНИЯ.', 'mb-dim');
+        } else {
+          line('ТЕКУЩИЙ ПОЛЬЗОВАТЕЛЬ: FLYNN.', 'mb-success');
+          line('СЕАНС УЖЕ ОТКРЫТ. ВВЕДИ UNAME -A.', 'mb-dim');
+        }
+        return;
+      }
+
       if (terminalMode === 'FLYNN') {
         if (lower === 'clear' || lower === 'reboot') {
           resetConsole();
@@ -137,16 +157,6 @@
           return;
         }
         line('КОМАНДА НЕ РАСПОЗНАНА ИЛИ УТИЛИТА НЕ АКТИВНА.', 'mb-error');
-        return;
-      }
-
-      if (lower === 'whoami') {
-        line('Выдано имя пользователя', 'mb-success');
-        terminalMode = 'FLYNN';
-        root.classList.add('mb-flynn');
-        flynnState = 'identity';
-        promptLabel.textContent = 'FLYNN:\\>';
-        levelLabel.textContent = 'SESSION: FLYNN';
         return;
       }
 
