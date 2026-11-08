@@ -55,6 +55,7 @@
       '<div class="mx-shell">' +
         '<div class="mx-topbar"><span class="mx-brand">MATRIX // REDFOX TERMINAL</span><span class="mx-status"><i></i> SYSTEM ONLINE</span></div>' +
         '<div class="mx-screen" id="mx-screen" aria-live="polite">' +
+          '<canvas class="mx-rain" id="mx-rain" aria-hidden="true"></canvas>' +
           '<div class="mx-output" id="mx-output"></div>' +
         '</div>' +
         '<form class="mx-input-line" id="mx-form" autocomplete="off">' +
@@ -72,6 +73,7 @@
     var input = root.querySelector('#mx-command');
     var screen = root.querySelector('#mx-screen');
     var clock = root.querySelector('#mx-clock');
+    startDigitalRain(screen, root.querySelector('#mx-rain'));
 
     function line(text, className) {
       var row = document.createElement('div');
@@ -203,6 +205,47 @@
     input.focus();
   }
 
+  function startDigitalRain(screen, canvas) {
+    if (!screen || !canvas || !canvas.getContext) return;
+    var ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    var drops = [];
+    var columns = 0;
+    var width = 0;
+    var height = 0;
+    var glyphs = 'アカサタナハマヤラワ012345789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+    function resize() {
+      var rect = screen.getBoundingClientRect();
+      width = Math.max(1, Math.floor(rect.width));
+      height = Math.max(1, Math.floor(rect.height));
+      canvas.width = width;
+      canvas.height = height;
+      columns = Math.ceil(width / 16);
+      drops = [];
+      for (var i = 0; i < columns; i += 1) drops[i] = Math.random() * -height / 16;
+    }
+
+    function draw() {
+      ctx.fillStyle = 'rgba(0, 7, 2, 0.10)';
+      ctx.fillRect(0, 0, width, height);
+      ctx.font = '12px monospace';
+      for (var i = 0; i < columns; i += 1) {
+        var glyph = glyphs.charAt(Math.floor(Math.random() * glyphs.length));
+        var y = drops[i] * 16;
+        ctx.fillStyle = Math.random() > 0.975 ? 'rgba(190,255,205,.9)' : 'rgba(35,220,90,.55)';
+        ctx.fillText(glyph, i * 16, y);
+        if (y > height && Math.random() > 0.975) drops[i] = 0;
+        drops[i] += 0.45 + Math.random() * 0.55;
+      }
+      window.requestAnimationFrame(draw);
+    }
+
+    resize();
+    window.addEventListener('resize', resize);
+    draw();
+  }
+
   function injectStyles() {
     if (document.getElementById(STYLE_ID)) return;
 
@@ -214,8 +257,8 @@
       '.mx-brand{color:#b5ffc9;font-weight:bold;text-shadow:0 0 8px rgba(0,255,90,.55);}',
       '.mx-status{color:#51c978;white-space:nowrap;font-size:10px;letter-spacing:1px;}',
       '.mx-status i{display:inline-block;width:7px;height:7px;margin-right:7px;border-radius:50%;background:#42ff78;box-shadow:0 0 9px #42ff78;}',
-      '.mx-screen{height:390px;overflow-y:auto;padding:18px 20px 12px;background:repeating-linear-gradient(0deg,rgba(0,255,90,.018) 0,rgba(0,255,90,.018) 1px,transparent 1px,transparent 4px),radial-gradient(ellipse at 50% 0%,rgba(0,90,35,.16),transparent 72%);}',
-      '.mx-output{min-height:100%;font-size:14px;line-height:1.65;overflow-wrap:anywhere;}',
+      '.mx-screen{position:relative;height:390px;overflow-y:auto;padding:18px 20px 12px;background:repeating-linear-gradient(0deg,rgba(0,255,90,.018) 0,rgba(0,255,90,.018) 1px,transparent 1px,transparent 4px),radial-gradient(ellipse at 50% 0%,rgba(0,90,35,.16),transparent 72%);}',
+      '.mx-rain{position:absolute;inset:0;width:100%;height:100%;opacity:.34;pointer-events:none;z-index:0;}.mx-output{position:relative;z-index:1;min-height:100%;font-size:14px;line-height:1.65;overflow-wrap:anywhere;}',
       '.mx-line{min-height:1.65em;color:#8affaa;white-space:pre-wrap;}',
       '.mx-dim{color:#43895a;}.mx-success{color:#65ff91;text-shadow:0 0 7px rgba(0,255,90,.3);}.mx-warning{color:#d2ed70;}.mx-error{color:#ff6868;}.mx-hint{color:#54c979;}.mx-command-echo{color:#d4ffdf;}.mx-wakeup{margin:5px 0;color:#baffc9;font-size:20px;font-weight:bold;letter-spacing:1px;text-shadow:0 0 12px rgba(0,255,90,.55);}',
       '.mx-input-line{display:flex;align-items:center;gap:9px;padding:13px 18px;border-top:1px solid #14552a;background:#001407;}',
