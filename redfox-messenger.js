@@ -9,7 +9,7 @@
       console.error('[RedFox Messenger] Не найдена REDFOX_MESSENGER_CONFIG.');
       return;
     }
-    const VERSION = '1.0.0';
+    const VERSION = '1.1.0';
     const storageKey = 'redfox-messenger:' + config.id + ':' + VERSION;
     const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const norm = v => String(v || '').toLowerCase().replace(/ё/g,'е').replace(/[^\p{L}\p{N}\s-]/gu,' ').replace(/\s+/g,' ').trim();
@@ -17,7 +17,7 @@
     const time = () => new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
     let state;
     try { state = JSON.parse(sessionStorage.getItem(storageKey) || 'null'); } catch (_) { state = null; }
-    if (!state || !Array.isArray(state.messages)) state = {messages:[],flags:{},activeContact:config.contacts[0].id};
+    if (!state || !Array.isArray(state.messages)) state = {messages:[],flags:{},unread:{},activeContact:config.contacts[0].id};
     if (!config.contacts.some(c => c.id === state.activeContact)) state.activeContact = config.contacts[0].id;
 
     const getContact = id => config.contacts.find(c => c.id === id) || config.contacts[0];
@@ -64,7 +64,7 @@
 .rfm-time{display:block;text-align:right;font-size:9px;color:#789197;margin-top:5px}
 .rfm-attachment{display:block;margin-top:8px;padding:10px;border:1px dashed #52716f;border-radius:7px;color:#9be8db;background:#0c1c20;font-size:11px}
 .rfm-attachment strong{display:block;color:#d8fff8;margin-bottom:4px}
-#rfm-typing{font-size:11px;color:#7d9b9f;padding:0 18px 8px;min-height:18px}
+#rfm-typing{font-size:11px;color:#7d9b9f;padding:0 18px 8px;min-height:18px}\n#rfm-toast{position:absolute;right:12px;top:68px;z-index:5;background:#153b38;border:1px solid #37bcae;color:#cafff6;padding:10px 14px;border-radius:7px;font-size:11px;opacity:0;transform:translateY(-6px);transition:.2s;pointer-events:none}\n#rfm-toast.show{opacity:1;transform:translateY(0)}
 #rfm-suggestions{display:flex;gap:6px;flex-wrap:wrap;padding:8px 14px 0;background:#101b21}
 .rfm-suggest{background:#132a30;border:1px solid #31534f;color:#9de8dc;border-radius:20px;padding:6px 10px;font-size:10px;cursor:pointer}
 .rfm-suggest:hover{background:#1b3b3d}
@@ -89,12 +89,14 @@
     const panel = $('#rfm-panel'), messageBox = $('#rfm-messages'), input = $('#rfm-input');
     let typingTimer = null;
 
+    function isUnlocked(c) { return !c.unlockFlag || !!state.flags[c.unlockFlag]; }
     function renderContacts() {
-      $('#rfm-contacts').innerHTML = config.contacts.map(c =>
-        '<button type="button" class="rfm-contact '+(c.id===state.activeContact?'active':'')+'" data-contact="'+esc(c.id)+'"><span class="rfm-avatar">'+esc(c.avatar || c.name.slice(0,1))+'</span><span class="rfm-contact-copy"><span class="rfm-contact-name">'+esc(c.name)+'</span><span class="rfm-contact-status">'+esc(c.status || 'в сети')+'</span></span></button>'
+      const visible = config.contacts.filter(isUnlocked);
+      $('#rfm-contacts').innerHTML = visible.map(c =>
+        '<button type="button" class="rfm-contact '+(c.id===state.activeContact?'active':'')+'" data-contact="'+esc(c.id)+'"><span class="rfm-avatar">'+esc(c.avatar || c.name.slice(0,1))+'</span><span class="rfm-contact-copy"><span class="rfm-contact-name">'+esc(c.name)+(state.unread[c.id]?' <b style="color:#56e5cf">●</b>':'')+'</span><span class="rfm-contact-status">'+esc(c.status || 'в сети')+'</span></span></button>'
       ).join('');
       $('#rfm-contacts').querySelectorAll('[data-contact]').forEach(button => button.addEventListener('click',() => {
-        state.activeContact = button.getAttribute('data-contact'); intro(getContact(state.activeContact)); save(); render();
+        state.activeContact = button.getAttribute('data-contact'); state.unread[state.activeContact]=false; intro(getContact(state.activeContact)); save(); render();
       }));
     }
     function renderMessages() {
@@ -114,7 +116,7 @@
     function render() {
       const c = getContact(state.activeContact);
       renderContacts(); $('#rfm-chatname').textContent=c.name; $('#rfm-chatdesc').textContent=c.description || c.status || '';
-      renderMessages(); renderSuggestions();
+      renderMessages();
     }
     function score(text,intent) {
       const n = norm(text), aliases = (intent.aliases || []).map(norm).filter(Boolean);
@@ -138,19 +140,48 @@
       }).filter(x => x.score>0).sort((a,b)=>b.score-a.score || a.index-b.index);
       return candidates.length ? contact.intents[candidates[0].index] : null;
     }
+    function scheduleEvents() {
+      (config.events || []).forEach(ev => {
+        if (!ev.id || !ev.whenFlag || !state.flags[ev.whenFlag] || state.flags['__event_'+ev.id]) return;
+        state.flags['__event_'+ev.id] = true; save();
+        const delay = Array.isArray(ev.delay) ? ev.delay[0] + Math.random()*(ev.delay[1]-ev.delay[0]) : Number(ev.delay || 5000);
+        setTimeout(() => {
+          const c = getContact(ev.contactId);
+          if (!c || !isUnlocked(c)) return;
+          (ev.messages || []).forEach((m,i) => setTimeout(() => {
+            addMessage(c.id,'them',m);
+            if (state.activeContact !== c.id) state.unread[c.id] = true;
+            else renderMessages();
+            renderContacts(); save();
+            if (state.activeContact !== c.id) showToast(c.name+' — новое сообщение');
+          }, i * Number(ev.messageGap || 1400)));
+        }, delay);
+      });
+    }
+    function showToast(message) {
+      let toast = $('#rfm-toast');
+      if (!toast) { toast=document.createElement('div'); toast.id='rfm-toast'; root.appendChild(toast); }
+      toast.textContent=message; toast.classList.add('show');
+      setTimeout(()=>toast.classList.remove('show'),3600);
+    }
     function answer(contact,text) {
       const intent=findIntent(contact,text);
-      if (!intent) { addMessage(contact.id,'them',pick(contact.fallback || config.fallback || ['Не понял сообщение. Попробуй иначе.'])); renderMessages(); return; }
+      if (!intent) {
+        addMessage(contact.id,'them',pick(contact.fallback || config.fallback || ['Не понял сообщение. Попробуй иначе.']));
+        save(); renderMessages(); return;
+      }
       if (intent.set) Object.keys(intent.set).forEach(k => { state.flags[k]=intent.set[k]; });
       addMessage(contact.id,'them',pick(intent.responses || intent.response || '...'));
-      save(); renderMessages(); renderSuggestions();
+      save(); renderMessages(); scheduleEvents();
     }
     function sendMessage() {
       const text=input.value.trim(); if (!text) return;
       const contact=getContact(state.activeContact); addMessage(contact.id,'me',text); input.value=''; renderMessages();
       $('#rfm-typing').textContent=(contact.name || 'Собеседник')+' печатает…';
       if (typingTimer) clearTimeout(typingTimer);
-      typingTimer=setTimeout(() => { $('#rfm-typing').textContent=''; answer(contact,text); },Number(config.replyDelay || 420));
+      const delayCfg = config.replyDelay || [1400,3200];
+      const delay = Array.isArray(delayCfg) ? delayCfg[0] + Math.random()*(delayCfg[1]-delayCfg[0]) : Number(delayCfg);
+      typingTimer=setTimeout(() => { $('#rfm-typing').textContent=''; answer(contact,text); },delay);
     }
     $('#rfm-compose').addEventListener('submit',e=>{e.preventDefault();sendMessage();});
     input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
@@ -158,7 +189,7 @@
     $('#rfm-close').addEventListener('click',()=>panel.classList.remove('rfm-open'));
     $('#rfm-reset').addEventListener('click',()=>{
       if(!window.confirm('Сбросить переписку в этой вкладке и начать заново?')) return;
-      state={messages:[],flags:{},activeContact:config.contacts[0].id};
+      state={messages:[],flags:{},unread:{},activeContact:config.contacts[0].id};
       try{sessionStorage.removeItem(storageKey);}catch(_){}
       intro(getContact(state.activeContact));save();render();
     });
