@@ -119,11 +119,40 @@
           line('ВЫВОД ИНФОРМАЦИИ ОБ ОПЕРАЦИОННОЙ СИСТЕМЕ И ЯДРЕ', 'mb-success');
           line('FLYNN OS 6.1.0 // MATRIX KERNEL x86_64', 'mb-dim');
           line('AVAILABLE UTILITIES (SIMULATED):', 'mb-warning');
-          line('DIR  CD / CHDIR  COPY / XCOPY / ROBOCOPY  DEL / ERASE', 'mb-dim');
-          line('MD / MKDIR  RD / RMDIR  REN / RENAME  TYPE', 'mb-dim');
-          line('TASKLIST  TASKKILL  SHUTDOWN  SCHTASKS  CHKDSK  DEFRAG', 'mb-dim');
-          line('DISKPART  SFC /SCANNOW  IPCONFIG  PING  TRACERT  NETSTAT', 'mb-dim');
-          line('PWD  RM  CAT  LESS / MORE  FIND / LOCATE', 'mb-dim');
+          line('DIR', 'mb-dim');
+          line('CD', 'mb-dim');
+          line('CHDIR', 'mb-dim');
+          line('COPY', 'mb-dim');
+          line('XCOPY', 'mb-dim');
+          line('ROBOCOPY', 'mb-dim');
+          line('DEL', 'mb-dim');
+          line('ERASE', 'mb-dim');
+          line('MD', 'mb-dim');
+          line('MKDIR', 'mb-dim');
+          line('RD', 'mb-dim');
+          line('RMDIR', 'mb-dim');
+          line('REN', 'mb-dim');
+          line('RENAME', 'mb-dim');
+          line('TYPE', 'mb-dim');
+          line('TASKLIST', 'mb-dim');
+          line('TASKKILL', 'mb-dim');
+          line('SHUTDOWN', 'mb-dim');
+          line('SCHTASKS', 'mb-dim');
+          line('CHKDSK', 'mb-dim');
+          line('DEFRAG', 'mb-dim');
+          line('DISKPART', 'mb-dim');
+          line('SFC /SCANNOW', 'mb-dim');
+          line('IPCONFIG', 'mb-dim');
+          line('PING', 'mb-dim');
+          line('TRACERT', 'mb-dim');
+          line('NETSTAT', 'mb-dim');
+          line('PWD', 'mb-dim');
+          line('RM', 'mb-dim');
+          line('CAT', 'mb-dim');
+          line('LESS', 'mb-dim');
+          line('MORE', 'mb-dim');
+          line('FIND', 'mb-dim');
+          line('LOCATE', 'mb-dim');
           line('SYSTEM UTILITIES LOADED. COMMAND EXECUTION RESTRICTED.', 'mb-warning');
           line('ДОСТУПНЫ CLEAR И REBOOT. ОСТАЛЬНЫЕ УТИЛИТЫ НЕАКТИВНЫ.', 'mb-dim');
           flynnState = 'utilities';
@@ -422,6 +451,7 @@
       '#'+ROOT_ID+'.mb-flynn .mb-online{color:#00dce8;}',
       '#'+ROOT_ID+'.mb-flynn .mb-online i{background:#00f7ff;box-shadow:0 0 9px #00f7ff;}',
       '#'+ROOT_ID+'.mb-flynn .mb-screen{background:rgba(0,8,12,.42);scrollbar-color:#007f89 #02090c;}',
+      '#'+ROOT_ID+'.mb-flynn .mb-rain{display:none!important;}',
       '#'+ROOT_ID+'.mb-flynn .mb-output{text-shadow:0 0 5px rgba(0,247,255,.22);}',
       '#'+ROOT_ID+'.mb-flynn .mb-line{color:#a9fbff;}',
       '#'+ROOT_ID+'.mb-flynn .mb-echo{color:#e0feff;}',
