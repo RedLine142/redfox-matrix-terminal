@@ -50,6 +50,9 @@
     var clock = root.querySelector('#mb-clock');
     var stage = 0;
     var adminClueRead = false;
+    var terminalMode = 'SYSTEM';
+    var flynnState = 'idle';
+    var promptLabel = root.querySelector('.mb-command label');
     var history = [];
     var historyIndex = 0;
 
@@ -67,25 +70,107 @@
     function execute(raw) {
       var command = raw.trim();
       if (!command) return;
-      line('SYSTEM:\\> ' + command, 'mb-echo');
+      line((terminalMode === 'FLYNN' ? 'FLYNN:\\> ' : 'SYSTEM:\\> ') + command, 'mb-echo');
       var lower = command.toLowerCase();
+
+      if (terminalMode === 'FLYNN') {
+        if (lower === 'clear' || lower === 'reboot') {
+          resetConsole();
+          return;
+        }
+        if (flynnState === 'laser') {
+          if (lower === 'n') {
+            line('ОТМЕНА ЗАПУСКА ЛАЗЕРА.', 'mb-warning');
+            resetConsole();
+          } else if (lower === 'y') {
+            line('LASER SEQUENCE INITIATED ............ OK', 'mb-success');
+            line('ACCESS GRANTED // FINAL REDFOX CODE:', 'mb-warning');
+            blank();
+            line(FINAL_CODE, 'mb-final');
+            blank();
+            line('ВВЕДИ КОД В ОСНОВНОЕ ПОЛЕ REDFOX.', 'mb-success');
+            flynnState = 'complete';
+          } else {
+            line('ВВЕДИ Y ИЛИ N.', 'mb-warning');
+          }
+          return;
+        }
+        if (lower === 'uname -a' && flynnState === 'identity') {
+          line('ВЫВОД ИНФОРМАЦИИ ОБ ОПЕРАЦИОННОЙ СИСТЕМЕ И ЯДРЕ', 'mb-success');
+          line('FLYNN OS 6.1.0 // MATRIX KERNEL x86_64', 'mb-dim');
+          line('AVAILABLE UTILITIES (SIMULATED):', 'mb-warning');
+          line('DIR  CD / CHDIR  COPY / XCOPY / ROBOCOPY  DEL / ERASE', 'mb-dim');
+          line('MD / MKDIR  RD / RMDIR  REN / RENAME  TYPE', 'mb-dim');
+          line('TASKLIST  TASKKILL  SHUTDOWN  SCHTASKS  CHKDSK  DEFRAG', 'mb-dim');
+          line('DISKPART  SFC /SCANNOW  IPCONFIG  PING  TRACERT  NETSTAT', 'mb-dim');
+          line('PWD  RM  CAT  LESS / MORE  FIND / LOCATE', 'mb-dim');
+          line('SYSTEM UTILITIES LOADED. COMMAND EXECUTION RESTRICTED.', 'mb-warning');
+          line('ДОСТУПНЫ CLEAR И REBOOT. ОСТАЛЬНЫЕ УТИЛИТЫ НЕАКТИВНЫ.', 'mb-dim');
+          flynnState = 'utilities';
+          return;
+        }
+        if (lower === 'login -n root' && flynnState === 'utilities') {
+          line('ПОПЫТКА ВОЙТИ ПОД УЧЁТНОЙ ЗАПИСЬЮ СУПЕРПОЛЬЗОВАТЕЛЯ root', 'mb-warning');
+          line('STATUS: ЗАВЕРШИЛАСЬ НЕУДАЧЕЙ: *Login incorrect*', 'mb-error');
+          line('СЕАНС ОГРАНИЧЕН. ДОСТУПНЫ CLEAR И REBOOT.', 'mb-dim');
+          flynnState = 'root-failed';
+          return;
+        }
+        if (lower === 'backdoor' && flynnState === 'root-failed') {
+          line('HISTORY:', 'mb-success');
+          line('vi', 'mb-dim');
+          line('make', 'mb-dim');
+          line('sanity_check', 'mb-dim');
+          line('configure', 'mb-dim');
+          line('LLSDLaserControl -ok 1', 'mb-warning');
+          flynnState = 'backdoor-open';
+          return;
+        }
+        if (lower === 'llsdl lasercontrol -ok 1' && flynnState === 'backdoor-open') {
+          line('Launch Laser ?', 'mb-final');
+          line('Y / N', 'mb-warning');
+          flynnState = 'laser';
+          return;
+        }
+        if (lower === 'whoami' || lower === 'uname -a' || lower === 'login -n root' || lower === 'backdoor' || lower.indexOf('llsdl') === 0) {
+          line('КОМАНДА НЕДОСТУПНА В ТЕКУЩЕМ СОСТОЯНИИ СИСТЕМЫ.', 'mb-error');
+          return;
+        }
+        line('КОМАНДА НЕ РАСПОЗНАНА ИЛИ УТИЛИТА НЕ АКТИВНА.', 'mb-error');
+        return;
+      }
+
+      if (lower === 'whoami') {
+        line('Выдано имя пользователя', 'mb-success');
+        terminalMode = 'FLYNN';
+        flynnState = 'identity';
+        promptLabel.textContent = 'FLYNN:\\>';
+        levelLabel.textContent = 'SESSION: FLYNN';
+        return;
+      }
 
       if (lower === 'help') {
         line('ДОСТУПНЫЕ КОМАНДЫ:', 'mb-success');
-        line('HELP                 — СПИСОК КОМАНД');
-        line('SCAN                 — СКАНИРОВАТЬ УЗЕЛ');
-        line('CAT WELCOME.LOG      — ПРОЧИТАТЬ ПЕРЕХВАЧЕННОЕ СООБЩЕНИЕ');
-        line('AUTH GUEST <КЛЮЧ>    — ПОЛУЧИТЬ GUEST');
-        line('LS                   — СПИСОК ФАЙЛОВ');
-        line('CAT USER.KEY         — ПРОЧИТАТЬ ФАЙЛ ДОСТУПА');
-        line('CAT TRACE.LOG        — ПРОЧИТАТЬ ЖУРНАЛ ПЕРЕХВАТА');
-        line('CAT ADMIN.AUDIT       — ПРОЧИТАТЬ АУДИТ (USER)');
-        line('AUTH USER <КЛЮЧ>     — ПОЛУЧИТЬ USER');
-        line('AUDIT                — ПРОВЕРИТЬ ЗАЩИТУ');
-        line('EXPLOIT <КЛЮЧ>       — ИСПОЛЬЗОВАТЬ УЯЗВИМОСТЬ');
-        line('CAT VAULT.DAT        — ОТКРЫТЬ ЗАЩИЩЁННЫЙ ФАЙЛ');
+        line('HELP                 — СПИСОК ДОСТУПНЫХ КОМАНД');
+        line('WHOAMI               — ОПРЕДЕЛИТЬ ТЕКУЩЕГО ПОЛЬЗОВАТЕЛЯ');
         line('STATUS               — ТЕКУЩИЙ УРОВЕНЬ ДОСТУПА');
         line('CLEAR                — ОЧИСТИТЬ ЭКРАН');
+        if (stage === 0) {
+          line('SCAN                 — СКАНИРОВАТЬ УЗЕЛ');
+          line('AUTH GUEST <КЛЮЧ>    — ПОЛУЧИТЬ GUEST');
+        } else {
+          line('LS                   — СПИСОК ФАЙЛОВ');
+          line('CAT WELCOME.LOG      — ПРОЧИТАТЬ ПЕРЕХВАЧЕННОЕ СООБЩЕНИЕ');
+          line('CAT USER.KEY         — ПРОЧИТАТЬ ЗАШИФРОВАННЫЙ ТОКЕН');
+          line('CAT TRACE.LOG        — ПРОЧИТАТЬ ЖУРНАЛ ПЕРЕХВАТА');
+          line('AUTH USER <КЛЮЧ>     — ПОЛУЧИТЬ USER');
+        }
+        if (stage >= 2) {
+          line('CAT ADMIN.AUDIT      — ПРОЧИТАТЬ АУДИТ');
+          line('AUDIT                — ПРОАНАЛИЗИРОВАТЬ ЗАЩИТУ');
+          line('EXPLOIT <КЛЮЧ>       — ИСПОЛЬЗОВАТЬ УЯЗВИМОСТЬ');
+        }
+        if (stage >= 3) line('CAT VAULT.DAT        — ОТКРЫТЬ ЗАЩИЩЁННЫЙ ФАЙЛ');
         return;
       }
       if (lower === 'clear' || lower === 'cls') { output.innerHTML = ''; return; }
@@ -255,7 +340,23 @@
         } else window.setTimeout(typeBoot, 130);
       })();
     }
-    typeBoot();
+    function resetConsole() {
+      stage = 0;
+      adminClueRead = false;
+      terminalMode = 'SYSTEM';
+      flynnState = 'idle';
+      promptLabel.textContent = 'SYSTEM:\\>';
+      levelLabel.textContent = 'ACCESS: LOCKED';
+      history = [];
+      historyIndex = 0;
+      output.innerHTML = '';
+      startBoot();
+    }
+    function startBoot() {
+      index = 0;
+      typeBoot();
+    }
+    startBoot();
   }
 
   function startRain(canvas, screen) {
