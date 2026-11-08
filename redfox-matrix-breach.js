@@ -74,6 +74,7 @@
         line('ДОСТУПНЫЕ КОМАНДЫ:', 'mb-success');
         line('HELP                 — СПИСОК КОМАНД');
         line('SCAN                 — СКАНИРОВАТЬ УЗЕЛ');
+        line('CAT WELCOME.LOG      — ПРОЧИТАТЬ ПЕРЕХВАЧЕННОЕ СООБЩЕНИЕ');
         line('AUTH GUEST <КЛЮЧ>    — ПОЛУЧИТЬ GUEST');
         line('LS                   — СПИСОК ФАЙЛОВ');
         line('CAT USER.KEY         — ПРОЧИТАТЬ ФАЙЛ ДОСТУПА');
@@ -96,8 +97,9 @@
       if (lower === 'scan') {
         line('СКАНИРОВАНИЕ СЕТЕВОГО УЗЛА...', 'mb-dim');
         line('НАЙДЕН ЗАКРЫТЫЙ ШЛЮЗ GUEST', 'mb-success');
-        line('ПОДСКАЗКА: НАЙДИ СЛЕДУЮЩЕЕ ЧИСЛО В РЯДУ: 3, 8, 15, 24, 35, ?', 'mb-warning');
-        line('РАЗНИЦА МЕЖДУ СОСЕДНИМИ ЧИСЛАМИ КАЖДЫЙ РАЗ РАСТЁТ НА 2.', 'mb-dim');
+        line('ПЕРЕХВАЧЕН РАДИОСИГНАЛ:', 'mb-dim');
+        line('-- .- - .-. .. -..-', 'mb-warning');
+        line('ИСТОЧНИК НЕ ОПРЕДЕЛЁН. СИГНАЛ ПОВТОРЯЕТСЯ.', 'mb-dim');
         line('AUTH GUEST <КЛЮЧ>', 'mb-dim');
         return;
       }
@@ -114,45 +116,51 @@
       if (lower === 'cat welcome.log') {
         if (stage < 1) { line('ACCESS DENIED // GUEST REQUIRED', 'mb-error'); return; }
         line('WELCOME, GUEST.', 'mb-success');
-        line('НЕКОТОРЫЕ ФАЙЛЫ ЗАЩИЩЕНЫ. ИЩИ КЛЮЧ В USER.KEY.', 'mb-dim');
+        line('ПЕРВЫЙ КЛЮЧ БЫЛ ПЕРЕДАН НЕ ГОЛОСОМ, А РАДИОСИГНАЛОМ.', 'mb-dim');
+        line('ВСПОМНИ АЗБУКУ, СОСТОЯЩУЮ ИЗ ТОЧЕК И ТИРЕ.', 'mb-warning');
+        line('ДАЛЬШЕ ИЗУЧИ USER.KEY И TRACE.LOG.', 'mb-dim');
         return;
       }
       if (lower === 'cat user.key' || lower === 'type user.key') {
         if (stage < 1) { line('ACCESS DENIED // GUEST REQUIRED', 'mb-error'); return; }
         line('USER AUTH TOKEN // DAMAGED RECORD', 'mb-warning');
-        line('ЦИФРЫ ТОКЕНА: 7 2 9 4', 'mb-success');
-        line('ПОРЯДОК ЦИФР НЕ СОВПАДАЕТ С ПОРЯДКОМ ПОЗИЦИЙ.', 'mb-dim');
-        line('ИЩИ ПОРЯДОК ПОЗИЦИЙ В TRACE.LOG.', 'mb-warning');
+        line('VIGENERE CIPHER // ENCRYPTED TOKEN', 'mb-warning');
+        line('TQHZHFNQGL', 'mb-success');
+        line('СООБЩЕНИЕ ЗАШИФРОВАНО. КЛЮЧ НЕ ХРАНИТСЯ В ЭТОМ ФАЙЛЕ.', 'mb-dim');
+        line('НАЙДИ ПОДСКАЗКУ В TRACE.LOG.', 'mb-warning');
         return;
       }
       if (lower === 'cat trace.log' || lower === 'type trace.log') {
         if (stage < 1) { line('ACCESS DENIED // GUEST REQUIRED', 'mb-error'); return; }
         line('TRACE // PACKET RECONSTRUCTION', 'mb-success');
-        line('СОБЕРИ ТОКЕН, ЧИТАЯ ЦИФРЫ ИЗ USER.KEY В ПОРЯДКЕ ПОЗИЦИЙ:', 'mb-dim');
-        line('3 → 1 → 4 → 2', 'mb-warning');
+        line('ПЕРЕХВАЧЕННЫЙ КОММЕНТАРИЙ ОПЕРАТОРА:', 'mb-success');
+        line('«КЛЮЧ — ФАМИЛИЯ АВТОРА РОМАНА NEUROMANCER».', 'mb-warning');
+        line('САМ ШИФР НАЗВАН В ЧЕСТЬ ФРАНЦУЗСКОГО ДИПЛОМАТА XVI ВЕКА.', 'mb-dim');
+        line('НАЙДИ ФАМИЛИЮ АВТОРА, ЗАТЕМ РАСШИФРУЙ USER.KEY.', 'mb-dim');
         return;
       }
       if (lower === 'cat admin.audit' || lower === 'type admin.audit') {
         if (stage < 2) { line('ACCESS DENIED // USER PRIVILEGES REQUIRED', 'mb-error'); return; }
         adminClueRead = true;
         line('ADMIN AUDIT // FRAGMENT 07', 'mb-success');
-        line('ПОСЛЕДОВАТЕЛЬНОСТЬ: 2, 6, 12, 20, 30, ?', 'mb-warning');
-        line('КАЖДЫЙ ЧЛЕН — ПРОИЗВЕДЕНИЕ ДВУХ СОСЕДНИХ НАТУРАЛЬНЫХ ЧИСЕЛ.', 'mb-dim');
-        line('НАЙДИ СЛЕДУЮЩИЙ ЧЛЕН. ПОСЛЕ ЭТОГО ЗАПУСТИ AUDIT.', 'mb-dim');
+        line('AABAB ABBBA BAAAB BAABB BBAAA BAABB BABBA ABBBA', 'mb-warning');
+        line('ДАННЫЕ СОСТОЯТ ИЗ ДВУХ СИМВОЛОВ И РАЗБИТЫ НА ГРУППЫ ПО ПЯТЬ.', 'mb-dim');
+        line('ИЩИ ШИФР, СВЯЗАННЫЙ С ИМЕНЕМ FRANCIS BACON.', 'mb-dim');
+        line('ПОЛУЧЕННЫЙ ТЕКСТ — НЕ ЧИСЛО. ВСПОМНИ «ОТВЕТ НА ГЛАВНЫЙ ВОПРОС ЖИЗНИ, ВСЕЛЕННОЙ И ВСЕГО ОСТАЛЬНОГО».', 'mb-warning');
         return;
       }
       if (lower === 'audit') {
         if (stage < 2) { line('ACCESS DENIED // USER PRIVILEGES REQUIRED', 'mb-error'); return; }
         if (!adminClueRead) { line('СНАЧАЛА ПРОЧИТАЙ ADMIN.AUDIT.', 'mb-warning'); return; }
         line('ADMIN GATE // PATTERN ANALYSIS READY', 'mb-warning');
-        line('ПОДСКАЗКА: ЭТО КВАДРАТЫ, УМНОЖЕННЫЕ НА СЛЕДУЮЩЕЕ ЧИСЛО.', 'mb-success');
-        line('2×3=6, 3×4=12, 4×5=20, 5×6=30...', 'mb-dim');
-        line('ПЕРЕДАЙ СЛЕДУЮЩЕЕ ЗНАЧЕНИЕ В EXPLOIT.', 'mb-dim');
+        line('ПРОТОКОЛ АНАЛИЗА ЗАВЕРШЁН.', 'mb-success');
+        line('ПОДСКАЗКА: ДЕКОДИРУЙ ГРУППЫ A/B, А ЗАТЕМ НАЙДИ, КАКОЕ ЧИСЛО НАЗЫВАЮТ ОТВЕТОМ НА ГЛАВНЫЙ ВОПРОС.', 'mb-dim');
+        line('ПЕРЕДАЙ ЧИСЛО В EXPLOIT.', 'mb-warning');
         return;
       }
       if (lower.indexOf('auth guest ') === 0) {
         if (stage > 0) { line('GUEST ACCESS ALREADY GRANTED.', 'mb-warning'); return; }
-        if (command.slice(11).trim() === '48') {
+        if (command.slice(11).trim().toUpperCase() === 'MATRIX') {
           stage = 1; setLevel('GUEST');
           line('КЛЮЧ ПРИНЯТ. GUEST ACCESS GRANTED.', 'mb-success');
           line('ДОСТУПЕН КАТАЛОГ /GUEST/. ИСПОЛЬЗУЙ LS.', 'mb-dim');
@@ -162,7 +170,7 @@
       if (lower.indexOf('auth user ') === 0) {
         if (stage < 1) { line('СНАЧАЛА ПОЛУЧИ УРОВЕНЬ GUEST.', 'mb-error'); return; }
         if (stage >= 2) { line('USER ACCESS ALREADY GRANTED.', 'mb-warning'); return; }
-        if (command.slice(10).trim() === '9742') {
+        if (command.slice(10).trim().toUpperCase() === 'NIGHTSHIFT') {
           stage = 2; setLevel('USER');
           line('TOKEN VERIFIED. USER ACCESS GRANTED.', 'mb-success');
           line('ОБНАРУЖЕН СКРЫТЫЙ ADMIN GATE. ВЫПОЛНИ AUDIT.', 'mb-dim');
