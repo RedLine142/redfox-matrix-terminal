@@ -38,7 +38,7 @@
 
       var itemNode = link.closest('.item');
       var progressSource = itemNode ? itemNode.textContent : link.textContent;
-      var progressMatch = progressSource.match(/(\\d+)\\s*\\/\\s*(\\d+)/);
+      var progressMatch = progressSource.match(/(\d+)\s*\/\s*(\d+)/);
       var progressBar = itemNode ? itemNode.querySelector('.progress .progress-bar, .progress-bar') : null;
       var progressPercent = progressBar ? parseFloat(progressBar.style.width) : null;
 
