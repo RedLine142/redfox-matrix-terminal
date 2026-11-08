@@ -160,7 +160,7 @@
         ctx.fillStyle = Math.random() > 0.985 ? 'rgba(210,255,220,.95)' : 'rgba(55,230,105,.55)';
         ctx.fillText(chars.charAt(Math.floor(Math.random() * chars.length)), i * 19, y);
         if (y > height && Math.random() > 0.98) drops[i] = 0;
-        drops[i] += 0.175 + Math.random() * 0.175;
+        drops[i] += 0.0875 + Math.random() * 0.0875;
       }
 
       // CICADA 3301: characters flash independently at random positions.
