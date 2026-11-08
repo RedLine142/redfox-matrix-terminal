@@ -118,7 +118,7 @@
     var columns = 0;
     var drops = [];
     var frame = 0;
-    var chars = 'アカサタナハマヤラワ012345789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0123456789';
     var secretChars = Array.from('цикада3301');
     var secretBag = [];
     var secretIndex = 0;
