@@ -9,7 +9,7 @@
       console.error('[RedFox Messenger] Не найдена REDFOX_MESSENGER_CONFIG.');
       return;
     }
-    const VERSION = '1.1.0';
+    const VERSION = '1.2.0';
     const storageKey = 'redfox-messenger:' + config.id + ':' + VERSION;
     const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const norm = v => String(v || '').toLowerCase().replace(/ё/g,'е').replace(/[^\p{L}\p{N}\s-]/gu,' ').replace(/\s+/g,' ').trim();
@@ -117,7 +117,7 @@
       const n = norm(text), aliases = (intent.aliases || []).map(norm).filter(Boolean);
       for (const a of aliases) {
         if (n===a) return 100+a.length;
-        if (a.length>3 && (' '+n+' ').includes(' '+a+' ')) return 80+a.length;
+        if (a.length>2 && (' '+n+' ').includes(' '+a+' ')) return 80+a.length;
       }
       const m=intent.match || {}, forbidden=(m.none || []).map(norm);
       if (forbidden.some(w => w && n.includes(w))) return 0;
